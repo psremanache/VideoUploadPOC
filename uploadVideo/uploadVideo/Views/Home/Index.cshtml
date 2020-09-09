@@ -1,0 +1,30 @@
+﻿@model uploadVideo.Models.IndexViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+<hr />
+<p>
+    <a asp-controller="Home" asp-action="Register">Register</a>
+</p>
+<table class="table">
+    <tr>
+        <th>User Name</th>
+        <th>Profession</th>
+        <th></th>
+    </tr>
+@if (Model.talentShower != null)
+{
+    @foreach (var item in Model.talentShower)
+    {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.Profession</td>
+            <td>
+                <a asp-controller="VideoOperation" asp-action="Edit" asp-route-id="@item.userId">Edit</a> |
+                <a asp-controller="VideoOperation" asp-action="Delete" asp-route-id="@item.userId">Delete</a> |
+                <a asp-controller="VideoOperation" asp-action="Upload" asp-route-id="@item.userId">Upload Video</a>
+            </td>
+        </tr>
+    }
+}
+</table>
