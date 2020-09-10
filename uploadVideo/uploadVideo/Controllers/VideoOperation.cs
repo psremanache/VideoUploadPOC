@@ -48,22 +48,48 @@ namespace uploadVideo.Controllers
                                         // filter by name
             return await talentShower.Find(filter).ToListAsync();
         }
-        public IActionResult Upload()
+        public async Task<TalentShower> GetUser(string id)
         {
-            return View();
+            return await talentShower.Find(new BsonDocument("_id", new ObjectId(id))).FirstOrDefaultAsync();
+        }
+
+        public async Task<Video> GetVideoFileId(string id)
+        {
+            var filter = Builders<Video>.Filter.Eq("videoUploaderId", id);
+            return await video.Find(filter).FirstOrDefaultAsync();          
+        }
+        public async Task<IActionResult> Delete(string id)
+        {
+            TalentShower ts = await GetUser(id);         
+            if (ts.hasFile)
+            {
+                var localVideo = await GetVideoFileId(id);//Finding video file ID            
+                await gridFS.DeleteAsync(new ObjectId(localVideo.videoFileId));//deleting video
+                var filter = Builders<Video>.Filter.Eq("videoUploaderId", id);
+                await video.DeleteOneAsync(filter);
+            }          
+            await talentShower.DeleteOneAsync(new BsonDocument("_id", new ObjectId(id)));
+            return RedirectToAction("Index", "Home");
+        }
+        public async Task<IActionResult> Upload(string id)
+        {
+            TalentShower ts = await GetUser(id);           
+            var tuple = new Tuple<TalentShower, Video>(ts, new Video());
+            return View(tuple);
         }
         [HttpPost]
-        public async Task<IActionResult> Upload( Video p, IFormFile uploadedFile)
-        {            
+        public async Task<IActionResult> Upload([Bind(Prefix = "Item2")] Video p, [Bind(Prefix = "Item1")] TalentShower ts, IFormFile uploadedFile)
+        {         
+            
             if (ModelState.IsValid)
             {
                 await video.InsertOneAsync(p);
                 ObjectId fileId = new ObjectId();
                 fileId = await gridFS.UploadFromStreamAsync(uploadedFile.FileName, uploadedFile.OpenReadStream());
                 p.videoFileId = fileId.ToString();
-                
+                ts.hasFile = true;
             }
-            return View(p);
+            return RedirectToAction("Index", "Home");
         }
         public async Task<ActionResult> GetFile(string id)
         {

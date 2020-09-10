@@ -19,7 +19,7 @@ namespace uploadVideo.Models
 
         [Display(Name = "Profession")]
         public string Profession { get; set; }
-       
+        public bool hasFile { get; set; }
        
     }
 }

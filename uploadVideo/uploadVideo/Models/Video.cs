@@ -11,10 +11,8 @@ namespace uploadVideo.Models
 {
     public class Video
     {
-        [BsonId]//gives us flexibility to name the index as we want
-        [BsonRepresentation(BsonType.ObjectId)]//lets u juggle between mongo and internal .net model
-        public string videoDetailsId { get; set; } //This id is generated when files details are stored
-
+        
+        public string videoUploaderId { get; set; } //This id is uploader ID 
         [Display(Name = "Video Name")]
         public string videoName { get; set; }
 

@@ -30,6 +30,7 @@ namespace uploadVideo.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(TalentShower ts)
         {
+            ts.hasFile = false;
             if (ModelState.IsValid)
             {
                 await videoOperation.RegisterInMongoDB(ts);
