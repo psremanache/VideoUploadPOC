@@ -55,7 +55,7 @@ namespace uploadVideo.Controllers
 
         public async Task<Video> GetVideoFileId(string id)
         {
-            var filter = Builders<Video>.Filter.Eq("videoUploaderId", id);
+            var filter = Builders<Video>.Filter.Eq(x=>x.videoUploaderId, id);
             return await video.Find(filter).FirstOrDefaultAsync();          
         }
         public async Task<IActionResult> Delete(string id)
@@ -65,7 +65,7 @@ namespace uploadVideo.Controllers
             {
                 var localVideo = await GetVideoFileId(id);//Finding video file ID            
                 await gridFS.DeleteAsync(new ObjectId(localVideo.videoFileId));//deleting video
-                var filter = Builders<Video>.Filter.Eq("videoUploaderId", id);
+                var filter = Builders<Video>.Filter.Eq(x => x.videoUploaderId, id);
                 await video.DeleteOneAsync(filter);
             }          
             await talentShower.DeleteOneAsync(new BsonDocument("_id", new ObjectId(id)));
@@ -78,22 +78,26 @@ namespace uploadVideo.Controllers
             return View(tuple);
         }
         [HttpPost]
-        public async Task<IActionResult> Upload([Bind(Prefix = "Item2")] Video p, [Bind(Prefix = "Item1")] TalentShower ts, IFormFile uploadedFile)
+        public async Task<IActionResult> Upload([Bind(Prefix = "Item2")] Video p, IFormFile uploadedFile)
         {         
             
             if (ModelState.IsValid)
-            {
-                await video.InsertOneAsync(p);
+            {        
                 ObjectId fileId = new ObjectId();
                 fileId = await gridFS.UploadFromStreamAsync(uploadedFile.FileName, uploadedFile.OpenReadStream());
                 p.videoFileId = fileId.ToString();
-                ts.hasFile = true;
+                await video.InsertOneAsync(p);
+                //for updating
+                var filter = Builders<TalentShower>.Filter.Eq(x=>x.userId,p.videoUploaderId);
+                var update = Builders<TalentShower>.Update.Set(x=>x.hasFile, true);
+                await talentShower.UpdateOneAsync(filter, update);
             }
             return RedirectToAction("Index", "Home");
         }
-        public async Task<ActionResult> GetFile(string id)
+        public async Task<ActionResult> GetFile(string Userid)
         {
-            var file = await gridFS.DownloadAsBytesAsync(new ObjectId(id));
+            var localVideo = await GetVideoFileId(Userid);//Finding video file ID 
+            var file = await gridFS.DownloadAsBytesAsync(new ObjectId(localVideo.videoFileId));
             if (file == null)
             {
                 return NotFound();

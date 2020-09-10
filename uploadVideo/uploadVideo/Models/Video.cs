@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace uploadVideo.Models
 {
+    [BsonIgnoreExtraElements]
     public class Video
     {
-        
         public string videoUploaderId { get; set; } //This id is uploader ID 
         [Display(Name = "Video Name")]
         public string videoName { get; set; }
