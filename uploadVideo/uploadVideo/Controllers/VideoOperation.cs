@@ -94,7 +94,6 @@ namespace uploadVideo.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-
         public async Task<ActionResult> GetFile(string Userid)
         {
 
