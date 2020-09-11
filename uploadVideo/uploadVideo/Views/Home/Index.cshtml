@@ -19,8 +19,7 @@
         <tr>
             <td>@item.Name</td>
             <td>@item.Profession</td>
-            <td>
-                <a asp-controller="VideoOperation" asp-action="Edit" asp-route-id="@item.userId">Edit</a> |
+            <td>                
                 <a asp-controller="VideoOperation" asp-action="Delete" asp-route-id="@item.userId">Delete</a> |
                 <a asp-controller="VideoOperation" asp-action="Upload" asp-route-id="@item.userId">Upload Video</a>
             </td>

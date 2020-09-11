@@ -94,8 +94,10 @@ namespace uploadVideo.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
+
         public async Task<ActionResult> GetFile(string Userid)
         {
+
             var localVideo = await GetVideoFileId(Userid);//Finding video file ID 
             var file = await gridFS.DownloadAsBytesAsync(new ObjectId(localVideo.videoFileId));
             if (file == null)
