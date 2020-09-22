@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
@@ -14,22 +15,24 @@ using uploadVideo.Models;
 
 namespace uploadVideo.Controllers
 {
+    
     public class VideoOperation : Controller
     {
-       
+        IConfiguration configuration;//Used for connection string
         IGridFSBucket gridFS;   //file storage
         IMongoCollection<Video> video; // collection in video database
         IMongoCollection<TalentShower> talentShower;//collection talentshower
 
-        public VideoOperation()
+        public VideoOperation(IConfiguration _configuration)
         {
+            configuration = _configuration;
             //connection string
-            string connectionString = "mongodb://localhost:27017/VideoDB";
-            var connection = new MongoUrlBuilder(connectionString);
+            string connectionString = configuration.GetSection("MongoDB").GetSection("ConnectionString").Value;
+            //var connection = new MongoUrlBuilder(connectionString);
             // get a client to interact with the database
-            MongoClient client = new MongoClient(connectionString);
+            var client = new MongoClient(connectionString);
             // we get access to the database itself
-            IMongoDatabase database = client.GetDatabase(connection.DatabaseName);
+            IMongoDatabase database = client.GetDatabase("VideoDB");
             // get access to file storage
             gridFS = new GridFSBucket(database);
             video = database.GetCollection<Video>("Videos");
