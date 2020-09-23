@@ -20,8 +20,8 @@
             <td>@item.Name</td>
             <td>@item.Profession</td>
             <td>                
-                <a asp-controller="VideoOperation" asp-action="Delete" asp-route-id="@item.userId">Delete</a> |
-                <a asp-controller="VideoOperation" asp-action="Upload" asp-route-id="@item.userId">Upload Video</a>
+                <a asp-controller="VideoOperation" asp-action="Delete" asp-route-userId="@item.userId">Delete</a> |
+                <a asp-controller="Home" asp-action="Login" asp-route-userId="@item.userId">Login</a>
             </td>
         </tr>
     }

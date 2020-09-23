@@ -39,17 +39,17 @@
         </form>
     </div>
 </div>
-<h4>Uploaded Video</h4>
+@*<h4>Uploaded Video</h4>
 @if (Model.Item1.hasFile)
 {
     <video width="320" height="240" controls autoplay>
         <source src="@Url.Action("GetFile","VideoOperation",new {Model.Item1.userId })" type="video/mp4">
         Your browser does not support the video tag.
     </video>
-}
+}*@
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Back to Home</a>
 </div>
 
 @section Scripts {

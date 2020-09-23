@@ -22,6 +22,13 @@ namespace uploadVideo.Controllers
             var model = new IndexViewModel { talentShower = Users };
             return View(model);
         }
+        public async Task<IActionResult> Login(string userId)
+        {
+            ViewBag.UserID = userId;
+            var Users = await videoOperation.GetUploadedVideo(userId);
+            var model = new IndexViewModel { Video = Users };
+            return View(model);
+        }
 
         public IActionResult Register()
         {

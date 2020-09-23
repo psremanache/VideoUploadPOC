@@ -1,0 +1,36 @@
+﻿@model uploadVideo.Models.IndexViewModel
+@{
+    ViewData["Title"] = "Login Page";
+}
+<hr />
+<p>
+    <a asp-controller="VideoOperation" asp-action="Upload" asp-route-id="@ViewBag.UserID">Upload Video</a>
+</p>
+<table class="table">
+    <tr>
+        <th>Video Name</th>
+        <th>Content type</th>
+        <th></th>
+    </tr>
+    @if (Model.Video != null)
+    {
+        @foreach (var item in Model.Video)
+        {
+            <tr>
+                <td>@item.videoName</td>
+                <td>@item.ContentType</td>
+                <td>
+                    <a asp-controller="VideoOperation" asp-action="DeleteOneVideoFile" asp-route-videoID="@item.videoFileId">Delete</a> |
+                    @*<a asp-controller="VideoOperation" asp-action="Edit" asp-route-id="@item.videoUploaderId">Edit Video</a>*@
+                </td>
+            </tr>
+            <video width="320" height="240" controls autoplay>
+                <source src="@Url.Action("GetFile","VideoOperation",new {item.videoFileId })" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        }
+    }
+</table>
+<div>
+    <a asp-action="Index">Back to Home</a>
+</div>

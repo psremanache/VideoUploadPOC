@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,6 +52,12 @@ namespace uploadVideo.Controllers
                                         // filter by name
             return await talentShower.Find(filter).ToListAsync();
         }
+        public async Task<IEnumerable<Video>> GetUploadedVideo(string userId)
+        {
+            // filter of all documents with the same Id
+            var filter = Builders<Video>.Filter.Eq(x => x.videoUploaderId, userId);                                                                   // filter by name
+            return await video.Find(filter).ToListAsync();
+        }
         public async Task<TalentShower> GetUser(string id)
         {
             return await talentShower.Find(new BsonDocument("_id", new ObjectId(id))).FirstOrDefaultAsync();
@@ -61,17 +68,31 @@ namespace uploadVideo.Controllers
             var filter = Builders<Video>.Filter.Eq(x=>x.videoUploaderId, id);
             return await video.Find(filter).FirstOrDefaultAsync();          
         }
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> DeleteOneVideoFile(string videoID)
         {
-            TalentShower ts = await GetUser(id);         
-            if (ts.hasFile)
+            await gridFS.DeleteAsync(new ObjectId(videoID));//deleting video
+            var filter = Builders<Video>.Filter.Eq(x => x.videoFileId, videoID);
+            var videoDetail= await video.Find(filter).FirstOrDefaultAsync();
+            await video.DeleteOneAsync(filter);
+            return RedirectToAction("Login", "Home",videoDetail.videoUploaderId);
+        }
+        
+        public async Task<IActionResult> Delete(string userId)
+        {          
+            var Videos = await GetUploadedVideo(userId);
+            var model = new IndexViewModel { Video = Videos };
+            if (model.Video != null)
             {
-                var localVideo = await GetVideoFileId(id);//Finding video file ID            
-                await gridFS.DeleteAsync(new ObjectId(localVideo.videoFileId));//deleting video
-                var filter = Builders<Video>.Filter.Eq(x => x.videoUploaderId, id);
-                await video.DeleteOneAsync(filter);
-            }          
-            await talentShower.DeleteOneAsync(new BsonDocument("_id", new ObjectId(id)));
+                foreach (var vid in model.Video)
+                {
+                    //  var localVideo = await GetVideoFileId(id);//Finding video file ID            
+                    await gridFS.DeleteAsync(new ObjectId(vid.videoFileId));//deleting video
+                    var filterVideo = Builders<Video>.Filter.Eq(x => x.videoFileId, vid.videoFileId);
+                    await video.DeleteOneAsync(filterVideo);
+                }
+            }
+            var filter = Builders<TalentShower>.Filter.Eq(x => x.userId, userId);
+            await talentShower.DeleteOneAsync(filter);           
             return RedirectToAction("Index", "Home");
         }
         public async Task<IActionResult> Upload(string id)
@@ -80,6 +101,7 @@ namespace uploadVideo.Controllers
             var tuple = new Tuple<TalentShower, Video>(ts, new Video());
             return View(tuple);
         }
+        
         [HttpPost]
         public async Task<IActionResult> Upload([Bind(Prefix = "Item2")] Video p, IFormFile uploadedFile)
         {         
@@ -97,11 +119,9 @@ namespace uploadVideo.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-        public async Task<ActionResult> GetFile(string Userid)
+        public async Task<ActionResult> GetFile(string videoFileId)
         {
-
-            var localVideo = await GetVideoFileId(Userid);//Finding video file ID 
-            var file = await gridFS.DownloadAsBytesAsync(new ObjectId(localVideo.videoFileId));
+            var file = await gridFS.DownloadAsBytesAsync(new ObjectId(videoFileId));
             if (file == null)
             {
                 return NotFound();
